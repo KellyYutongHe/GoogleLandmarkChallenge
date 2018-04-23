@@ -38,11 +38,10 @@ SIFT & K-Means
 '''
 sift = cv2.xfeatures2d.SIFT_create()
 
-k = 20
+k = 500
 kmeans = MiniBatchKMeans(n_clusters=k, random_state=None)
 
 count = 0
-# h = open("des.pickle", "wb")
 des_list = []
 im_features = np.zeros((len(image_paths), k), "float32")
 for image_path in image_paths:
@@ -59,9 +58,7 @@ for image_path in image_paths:
         # img=cv2.drawKeypoints(gray,kp,img)
         # cv2.imwrite(target + '_keypoints1.jpg',img)
 
-        kmeans.partial_fit(des)
-
-        if count % 100 == 0 and count != 0:
+        if count % 500 == 0 and count != 0:
             print count, "/", len(image_paths)
             descriptors = des_list[0]
             for descriptor in des_list[1:]:
@@ -69,6 +66,7 @@ for image_path in image_paths:
             '''
             K-Means
             '''
+            kmeans.partial_fit(descriptors)
             i = count
             for des in des_list:
                     words, distance = vq(descriptors, kmeans.cluster_centers_)
@@ -83,20 +81,6 @@ for image_path in image_paths:
     except cv2.error:
         print "failed: ", count, image_path
     count += 1
-
-# h.close()
-print "K-MEANS Training Completed"
-
-# '''
-# K-Means
-# '''
-# im_features = np.zeros((len(image_paths), k), "float32")
-# for i in range(len(image_paths)):
-#     with open("des.pickle", "rb") as h:
-#         des = pickle.load(h)
-#         words, distance = vq(des, kmeans.cluster_centers_)
-#         for w in words:
-#             im_features[i][w] += 1
 
 stdSlr = StandardScaler().fit(im_features)
 im_features = stdSlr.transform(im_features)
